@@ -148,7 +148,8 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
     content_df = pd.concat(content_df, ignore_index=True)
     feedback_df = pd.concat(feedback_df, ignore_index=True)
     df = pd.merge(left=content_df, right=feedback_df, how='left', on=['PAGEID', 'POSTID'])
-    df = df.loc[:,['NAME', 'TIME', 'CONTENT', 'PAGEID', 'POSTID', 'display_comments_count', 'total_comments_count', 'reaction_count', 'share_count', 'LIKE', 'LOVE', 'HAHA', 'SUPPORT', 'WOW', 'ANGER', 'SORRY', 'LINK']]
+    df = df.loc[:,['NAME', 'TIME', 'CONTENT', 'PAGEID', 'POSTID', 'display_comments_count', 'total_comments_count', 'reaction_count', 'share_count', 'LIKE', 'LOVE', 'HAHA', 'SUPPORT', 'WOW', 'ANGER', 'SORRY']]
+    df = df.rename(columns={'display_comments_count':'DISPLAYCOMMENTS', 'total_comments_count':'TOTAL_COMMENTS', 'reaction_count':'REACTIONS','share_count':'SHARES'})
     df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")      
     print('There are {} posts in DataFrame.'.format(str(df.shape[0])))
     return df

@@ -1,0 +1,8 @@
+LICENSE
+README.md
+setup.py
+facebook_crawler.egg-info/PKG-INFO
+facebook_crawler.egg-info/SOURCES.txt
+facebook_crawler.egg-info/dependency_links.txt
+facebook_crawler.egg-info/requires.txt
+facebook_crawler.egg-info/top_level.txt

@@ -1,3 +1,19 @@
+Metadata-Version: 2.1
+Name: facebook-crawler
+Version: 0.0.2
+Summary: You can collect data from Facebook's Fanspage/group elegantly.
+Home-page: https://github.com/TLYu0419/quantumtw
+Author: TENG-LIN YU
+Author-email: tlyu0419@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # Facebook_Crawler
 The project is developed by Teng-Lin Yu(游騰林). If you have any questions or suggestions, please feel free to contact me. 
 
@@ -55,4 +71,6 @@ The project could help us collect data from Facebook's public Fanspage / group. 
 ## To Do
 - GUI interface
 - Database
+
+
 
