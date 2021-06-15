@@ -1,8 +1,17 @@
 LICENSE
 README.md
+facebook_crawler.py
+requirements.txt
 setup.py
+__pycache__/Crawler.cpython-38.pyc
+__pycache__/facebook_crawler.cpython-38.pyc
+dist/facebook_crawler-0.0.2-py3-none-any.whl
+dist/facebook_crawler-0.0.2.tar.gz
 facebook_crawler.egg-info/PKG-INFO
 facebook_crawler.egg-info/SOURCES.txt
 facebook_crawler.egg-info/dependency_links.txt
 facebook_crawler.egg-info/requires.txt
 facebook_crawler.egg-info/top_level.txt
+images/ecgo.png
+images/quickstart_fanspage.png
+images/quickstart_group.png

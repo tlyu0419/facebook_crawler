@@ -5,14 +5,15 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="facebook_crawler",
-  version="0.0.3",
+  version="0.0.11",
   author="TENG-LIN YU",
   author_email="tlyu0419@gmail.com",
   description="You can collect data from Facebook's Fanspage/group elegantly.",
   long_description=long_description,
   long_description_content_type="text/markdown",
-  url="https://github.com/TLYu0419/quantumtw",
+  url="https://github.com/TLYu0419/facebook_crawler",
   packages=setuptools.find_packages(),
+  py_modules=['facebook_crawler'],
   classifiers=[
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
@@ -20,9 +21,10 @@ setuptools.setup(
   ],
   python_requires=">=3.6",
   install_requires=[
-      "requests==2.24.0",
-      "bs4==0.0.1"
-      "numpy==1.20.3",
-      "pandas==1.2.4"
+      "requests",
+      "bs4",
+      "numpy",
+      "pandas",
+      "lxml"
     ],
 )

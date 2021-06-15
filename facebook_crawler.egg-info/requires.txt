@@ -1,3 +1,5 @@
-requests==2.24.0
-bs4==0.0.1numpy==1.20.3
-pandas==1.2.4
+requests
+bs4
+numpy
+pandas
+lxml

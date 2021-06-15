@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: facebook-crawler
-Version: 0.0.2
+Version: 0.0.11
 Summary: You can collect data from Facebook's Fanspage/group elegantly.
-Home-page: https://github.com/TLYu0419/quantumtw
+Home-page: https://github.com/TLYu0419/facebook_crawler
 Author: TENG-LIN YU
 Author-email: tlyu0419@gmail.com
 License: UNKNOWN
