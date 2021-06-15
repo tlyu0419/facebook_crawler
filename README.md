@@ -6,9 +6,9 @@ The project is developed by Teng-Lin Yu(游騰林). If you have any questions or
 [![ecgo.png](https://raw.githubusercontent.com/TLYu0419/facebook_crawler/main/images/ecgo.png)](https://payment.ecpay.com.tw/QuickCollect/PayData?GcM4iJGUeCvhY%2fdFqqQ%2bFAyf3uA10KRo%2fqzP4DWtVcw%3d)
 
 
-Web crawler projects need much time to maintain and developed. If you could support me, I will really appreciate it. Either donate, star or share is good for me. Your support will help me develop more functions, such as a database, GUI interface, or any other possibilities(You can write an e-mail and share your thoughts with me.) 
+**Donate is not required to utilize this package**, but web crawler projects need much time to maintain and developed. If you could support me, I will really appreciate it. Either donate, star or share is good for me. Your support will help me to maintain and develop more functions.
 
-網路爬蟲專案會需要花費相當多時間來維護和開發。如果你能支持我我會非常感謝。不論是捐助、給星星或跟朋友分享對我來說都是非常好的支持方式。你的支持會是我繼續開發這個專案的動力，例如建立資料庫、圖形界面或其他任何的可能(歡迎寫信給我並跟我分享你的想法)
+**捐款不是使用這個套件的必要行為**，但網路爬蟲專案都會需要花費相當多時間來維護和開發，如果你能支持我我會非常感謝。不論是捐款、給星星或跟朋友分享對我來說都是非常好的支持方式。你的支持會是我維護和繼續開發新功能的動力
 
 ## What's this?
 
@@ -49,6 +49,7 @@ The project could help us collect data from Facebook's public Fanspage / group. 
 
 ## Contact
 - Email: tlyu0419@gmail.com
+- Facebook: 
 - Any suggestions is good and feel free to contact me.
 
 
