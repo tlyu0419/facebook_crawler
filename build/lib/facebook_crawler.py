@@ -189,13 +189,16 @@ def get_bac(resp):
     try:
         bac = re.findall('bac=(.*?)%3D',resp.text)[0]
     except:
-        bac = re.findall('bac%3D(.*?)%26', resp.text)[0]
+        try:
+            bac = re.findall('bac=(.*?)&amp',resp.text)[0]
+        except:
+            bac = re.findall('bac%3D(.*?)%26', resp.text)[0]
     return bac
 
 ## Crawl_GroupPosts
 def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
     
-    groupurl = re.sub('www','m','https://www.facebook.com/groups/pythontw')
+    groupurl = re.sub('www','m', groupurl)
     headers = {
         'referer': 'https://m.facebook.com/',
         'cookie': 'locale=en_US',
@@ -221,6 +224,7 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
             ndf = parse_group_content(resp)
             df.append(ndf)
             bac = get_bac(resp)
+            # print(bac) # print bac if something went wrong
             # update request params
             max_date = ndf['TIME'].sort_values(ascending=False,ignore_index=True)[3] # there are some posts will be pinned at top, so we can't take the max date directly
             print('TimeStamp: {}.'.format(max_date))
@@ -228,10 +232,11 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
 
         except:
             break_times += 1
+            # return resp # return resp if something went wrong
             print('break_times:', break_times)
         
         time.sleep(2)
-        if break_times > 15:
+        if break_times > 10:
             break
     
     
