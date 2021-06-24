@@ -1,5 +1,5 @@
 # Facebook_Crawler
-
+[![Downloads](https://static.pepy.tech/personalized-badge/facebook-crawler?period=total&units=international_system&left_color=grey&right_color=yellow&left_text=Downloads)](https://pypi.org/project/facebook-crawler/)
 - The project is developed by Teng-Lin Yu(游騰林). 
 - Any suggestions is good and feel free to contact me.
 
