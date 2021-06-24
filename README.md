@@ -1,5 +1,7 @@
 # Facebook_Crawler
-The project is developed by Teng-Lin Yu(游騰林). If you have any questions or suggestions, please feel free to contact me. 
+
+- The project is developed by Teng-Lin Yu(游騰林). 
+- Any suggestions is good and feel free to contact me.
 
 ## Support
 
@@ -47,18 +49,23 @@ The project can help us collect the data from Facebook's public Fanspage / group
 
 ## FAQ
 - **Could you please release the function that can collect comments content instead of only the number of comments?**
-  - Indeed, the comments and replies content are precious data on social media. But I wouldn't prefer to release this function due to Security. It would be horrible if someone does terrible things through this function. So, if someone needs the comments and replies content, he/she can write me an email and tell me the project purpose, and I will think about it case by case.
-- **How can I find out the post's link through the data?**
-  - You can add the string 'https://www.facebook.com' in front of the POSTID, and it's just its post link. So, for example, if the POSTID is 123456789, and its link is 'https://www.facebook.com/12345679'.
 
+  Indeed, the comments and replies content are precious data on social media. But I wouldn't prefer to release this function due to Security. It would be horrible if someone does terrible things through this function. So, if someone needs the comments and replies content, he/she can write me an email and tell me the project purpose, and I will think about it case by case.
+
+- **How can I find out the post's link through the data?**
+  
+  You can add the string 'https://www.facebook.com' in front of the POSTID, and it's just its post link. So, for example, if the POSTID is 123456789, and its link is 'https://www.facebook.com/12345679'.
+
+- **Can I collect the data in a specific time period?**
+  - Nope! It's relate to the facebook's website framework. 
+  The program is base on ...., so 你目前設計是可以從今天爬到某個日期，但如果
 ## License
 - [Apache License 2.0](https://github.com/TLYu0419/facebook_crawler/blob/main/LICENSE)
 - 本專案提供的所有內容均用於教育、非商業用途。本專案不對資料內容錯誤、更新延誤或傳輸中斷負任何責任。
 
-## Contact
+## Contact Info
 - Email: tlyu0419@gmail.com
 - Facebook: https://www.facebook.com/tlyu0419
-- Any suggestions is good and feel free to contact me.
 
 
 ## To Do
