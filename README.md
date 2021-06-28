@@ -28,7 +28,7 @@ The project can help us collect the data from Facebook's public Fanspage / group
 ## Quickstart
 - Install
   ```pip
-  pip install facebook-crawler
+  pip install -U facebook-crawler
   ```
 
 - Usage
@@ -67,7 +67,7 @@ The project can help us collect the data from Facebook's public Fanspage / group
 ## Contact Info
 - Email: tlyu0419@gmail.com
 - Facebook: https://www.facebook.com/tlyu0419
-- PTPI: https://pypi.org/project/facebook-crawler/
+- PYPI: https://pypi.org/project/facebook-crawler/
 - Github: https://github.com/TLYu0419/facebook_crawler
 
 ## To Do
