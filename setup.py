@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="facebook_crawler",
-  version="0.0.14",
+  version="0.0.18",
   author="TENG-LIN YU",
   author_email="tlyu0419@gmail.com",
   description="You can collect data from Facebook's Fanspage/group elegantly.",
@@ -19,7 +19,7 @@ setuptools.setup(
   "License :: OSI Approved :: Apache Software License",
   "Operating System :: OS Independent",
   ],
-  python_requires=">=3.6",
+  python_requires=">=3.7",
   install_requires=[
       "requests",
       "bs4",
