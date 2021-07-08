@@ -11,8 +11,14 @@ import numpy as np
 
 ## get page id
 def get_pageid(pageurl):
-    resp = requests.get(pageurl)
-    pageid = re.findall('page_id=(.*?)"',resp.text)[0]
+    try:
+        resp = requests.get(pageurl)
+        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
+    except:
+        headers= {'accept': 'text/html',
+                  'sec-fetch-mode': 'navigate'}
+        resp = requests.get(pageurl, headers=headers)
+        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
     return pageid
 
 ## parse_content
@@ -32,8 +38,8 @@ def parse_content(data):
         except:
             pass  
     df = pd.DataFrame(data=df, columns=['NAME', 'ID', 'TIME', 'CONTENT', 'LINK'])
-    df['PAGEID'] = df['ID'].apply(lambda x: re.split(r'_|;',x)[2])
-    df['POSTID'] = df['ID'].apply(lambda x: re.split(r'_|;',x)[3])
+    df['PAGEID'] = df['ID'].apply(lambda x: re.split(r'_|;|-|:',x)[2])
+    df['POSTID'] = df['ID'].apply(lambda x: re.split(r'_|;|:-',x)[3])
     df['TIME'] = df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)))
     df = df.drop('ID',axis=1)
     return df
@@ -141,7 +147,7 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
             print('break_times:', break_times)
         
         time.sleep(2)
-        if break_times > 10:
+        if break_times > 5:
             break
     
     # join content and reactions
@@ -151,7 +157,7 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
     df = df.loc[:,['NAME', 'TIME', 'CONTENT', 'PAGEID', 'POSTID', 'display_comments_count', 'total_comments_count', 'reaction_count', 'share_count', 'LIKE', 'LOVE', 'HAHA', 'SUPPORT', 'WOW', 'ANGER', 'SORRY']]
     df = df.rename(columns={'display_comments_count':'DISPLAYCOMMENTS', 'total_comments_count':'TOTAL_COMMENTS', 'reaction_count':'REACTIONS','share_count':'SHARES'})
     df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")      
-    print('There are {} posts in DataFrame.'.format(str(df.shape[0])))
+    print('There are {} posts in the DataFrame.'.format(str(df.shape[0])))
     return df
 
 # Group page ==================================================================
@@ -175,7 +181,10 @@ def parse_group_content(resp):
             pass
 
     df = pd.DataFrame(data=df, columns = ['ACTORID','POSTID', 'NAME', 'TIME','STORYNAME', 'CONTENT', 'REACTIONS'])
-    df['GROUPID'] = re.findall('\?id=([0-9]{1,})"',resp.text)[0]
+    try:
+        df['GROUPID'] = re.findall('\?id=([0-9]{1,})"',resp.text)[0]
+    except:
+        df['GROUPID'] = re.findall('https://m.facebook.com/groups/([0-9]{1,})\?',resp.text)[0]
     df['TIME'] = df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)))
     df['LIKES'] = df['REACTIONS'].apply(lambda x: re.findall('([0-9]{1,}) Like', x)[0] if 'Like' in x else '0')
     df['COMMENTS'] = df['REACTIONS'].apply(lambda x: re.findall('([0-9]{1,}) Comment', x)[0] if 'Comment' in x else '0')
@@ -186,17 +195,30 @@ def parse_group_content(resp):
 
 ## get_bac
 def get_bac(resp):
-    try:
-        bac = re.findall('bac=(.*?)%3D',resp.text)[0]
-    except:
-        try:
-            bac = re.findall('bac=(.*?)&amp',resp.text)[0]
-        except:
-            bac = re.findall('bac%3D(.*?)%26', resp.text)[0]
+    # string = urllib.parse.unquote(resp.text)
+    # try:
+    #     bac = re.findall('bac=(.*?)%3D',resp.text)[0]
+    # except:
+    #     bac = re.findall('bac=(.*?)\&multi',resp.text)[0]
+    bac = re.findall('bac=([0-9A-Za-z]{10,})',resp.text)[0]
+
     return bac
 
+# def get_bac(resp):
+#     try:
+#         bac = re.findall('bac=(.*?)%3D',resp.text)[0]
+#         print('type1')
+#     except:
+#         try:
+#             bac = re.findall('bac=(.*?)&amp',resp.text)[0]
+#             print('type2')
+#         except:
+#             bac = re.findall('bac%3D(.*?)%26', resp.text)[0]
+#             print('type3')
+#     return bac
+
 ## Crawl_GroupPosts
-def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
+def Crawl_GroupPosts(groupurl, until_date='2021-05-01'):
     
     groupurl = re.sub('www','m', groupurl)
     headers = {
@@ -218,29 +240,30 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
             'multi_permalinks': '',
             'refid': '18'
             }
-        
+
         resp = requests.get(groupurl, headers=headers, params=params)
         try:
             ndf = parse_group_content(resp)
             df.append(ndf)
-            bac = get_bac(resp)
-            # print(bac) # print bac if something went wrong
+            
             # update request params
-            max_date = ndf['TIME'].sort_values(ascending=False,ignore_index=True)[3] # there are some posts will be pinned at top, so we can't take the max date directly
+            bac = get_bac(resp) 
+            # print(bac)
+            # there are some posts will be pinned at top, so we can't take the max date directly
+            max_date = ndf['TIME'].sort_values(ascending=False,ignore_index=True)[3] 
             print('TimeStamp: {}.'.format(max_date))
             break_times = 0 # break times to zero
 
         except:
             break_times += 1
-            # return resp # return resp if something went wrong
             print('break_times:', break_times)
         
         time.sleep(2)
-        if break_times > 10:
-            break
-    
+        if break_times > 5:
+            return resp
+            # return print('ERROR: Please send the following URL to the author. \n', resp.url)
     
     # concat data we collect
     df = pd.concat(df, ignore_index=True)
-    print('There are {} posts in DataFrame.'.format(str(df.shape[0])))
+    print('There are {} posts in the DataFrame.'.format(str(df.shape[0])))
     return df

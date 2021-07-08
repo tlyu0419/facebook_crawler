@@ -6,14 +6,19 @@ import time
 import datetime
 import pandas as pd
 import numpy as np
-import urllib
 
 # Fans page ==================================================================
 
 ## get page id
 def get_pageid(pageurl):
-    resp = requests.get(pageurl)
-    pageid = re.findall('page_id=(.*?)"',resp.text)[0]
+    try:
+        resp = requests.get(pageurl)
+        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
+    except:
+        headers= {'accept': 'text/html',
+                  'sec-fetch-mode': 'navigate'}
+        resp = requests.get(pageurl, headers=headers)
+        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
     return pageid
 
 ## parse_content
@@ -152,7 +157,7 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
     df = df.loc[:,['NAME', 'TIME', 'CONTENT', 'PAGEID', 'POSTID', 'display_comments_count', 'total_comments_count', 'reaction_count', 'share_count', 'LIKE', 'LOVE', 'HAHA', 'SUPPORT', 'WOW', 'ANGER', 'SORRY']]
     df = df.rename(columns={'display_comments_count':'DISPLAYCOMMENTS', 'total_comments_count':'TOTAL_COMMENTS', 'reaction_count':'REACTIONS','share_count':'SHARES'})
     df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")      
-    print('There are {} posts in DataFrame.'.format(str(df.shape[0])))
+    print('There are {} posts in the DataFrame.'.format(str(df.shape[0])))
     return df
 
 # Group page ==================================================================
@@ -243,7 +248,7 @@ def Crawl_GroupPosts(groupurl, until_date='2021-05-01'):
             
             # update request params
             bac = get_bac(resp) 
-            print(bac)
+            # print(bac)
             # there are some posts will be pinned at top, so we can't take the max date directly
             max_date = ndf['TIME'].sort_values(ascending=False,ignore_index=True)[3] 
             print('TimeStamp: {}.'.format(max_date))

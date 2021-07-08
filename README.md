@@ -10,7 +10,7 @@
 
 **Donate is not required to utilize this package**, but it would be great to get your support. Either donate, star, or share are good for me. Your support will keep me in maintaining and develop more functions in this project.
 
-**贊助不是使用這個套件的必要條件**，但如能獲得你的支持我將會非常感謝。不論是贊助、給予星星或跟朋友分享對我來說都是非常好的支持方式。你的支持會幫助我繼續在這個專案中維護和開發新的功能。
+**贊助不是使用這個套件的必要條件**，但如能獲得你的支持我將會非常感謝。不論是贊助、給予星星或跟朋友分享對我來說都是非常好的支持方式。有你的支持我才能繼續在這個專案中維護和開發新的功能。
 
 ## What's this?
 
@@ -65,6 +65,7 @@ The project can help us collect the data from Facebook's public Fanspage / group
 - 本專案提供的所有內容均用於教育、非商業用途。本專案不對資料內容錯誤、更新延誤或傳輸中斷負任何責任。
 
 ## Contact Info
+- Author: TENG-LIN YU
 - Email: tlyu0419@gmail.com
 - Facebook: https://www.facebook.com/tlyu0419
 - PYPI: https://pypi.org/project/facebook-crawler/

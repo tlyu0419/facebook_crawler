@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="facebook_crawler",
-  version="0.0.18",
+  version="0.0.22",
   author="TENG-LIN YU",
   author_email="tlyu0419@gmail.com",
-  description="You can collect data from Facebook's Fanspage/group elegantly.",
+  description="",
   long_description=long_description,
   long_description_content_type="text/markdown",
   url="https://github.com/TLYu0419/facebook_crawler",
