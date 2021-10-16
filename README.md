@@ -9,7 +9,6 @@
 
 [![ecgo.png](https://raw.githubusercontent.com/TLYu0419/facebook_crawler/main/images/ecgo.png)](https://payment.ecpay.com.tw/QuickCollect/PayData?GcM4iJGUeCvhY%2fdFqqQ%2bFAyf3uA10KRo%2fqzP4DWtVcw%3d)
 
-
 **Donate is not required to utilize this package**, but it would be great to get your support. Either donate, star, or share are good for me. Your support will keep me in maintaining and develop more functions in this project.
 
 **贊助不是使用這個套件的必要條件**，但如能獲得你的支持我將會非常感謝。不論是贊助、給予星星或跟朋友分享對我來說都是非常好的支持方式。有你的支持我才能繼續在這個專案中維護和開發新的功能。
@@ -51,8 +50,6 @@ The project can help us collect the data from Facebook's public Fanspage / group
 
 ## FAQ
 - **Could you please release the function that can collect comments content instead of only the number of comments?**
-
-  Indeed, the comments and replies content are precious data on social media. But I wouldn't prefer to release this function due to Security. It would be horrible if someone does terrible things through this function. So, if someone needs the comments and replies content, he/she can write me an email and tell me the project purpose, and I will think about it case by case.
 
 - **How can I find out the post's link through the data?**
   
