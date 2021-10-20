@@ -1,150 +1,61 @@
-import requests
 import re
 import json
+import requests
 from bs4 import BeautifulSoup
 import time
 import datetime
 import pandas as pd
 import numpy as np
+from facebook_crawler.engine.crawler import pagecrawler
+from facebook_crawler.engine.parser import pageparser
 
 # Fans page ==================================================================
 
-## get page id
-def get_pageid(pageurl):
-    try:
-        resp = requests.get(pageurl)
-        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
-    except:
-        headers= {'accept': 'text/html',
-                  'sec-fetch-mode': 'navigate'}
-        resp = requests.get(pageurl, headers=headers)
-        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
-    return pageid
-
-## parse_content
-def parse_content(data):
-    df = []
-    soup = BeautifulSoup(data['domops'][0][3]['__html'], 'lxml')
-    # post
-    for ele in soup.findAll('div', {'class':'userContentWrapper'}):
-        try:
-            df.append([
-                ele.find('img')['aria-label'], #name
-                ele.find('div', {'data-testid':'story-subtitle'})['id'], # ID
-                ele.find('abbr')['data-utime'], # time
-                ''.join([i.text for i in ele.find('div', {'data-testid':'post_message'}).findAll('p')]), # content
-                ele.find('a')['href'].split('?')[0] # link
-                    ])
-        except:
-            pass  
-    df = pd.DataFrame(data=df, columns=['NAME', 'ID', 'TIME', 'CONTENT', 'LINK'])
-    df['PAGEID'] = df['ID'].apply(lambda x: re.split(r'_|;|-|:',x)[2])
-    df['POSTID'] = df['ID'].apply(lambda x: re.split(r'_|;|:-',x)[3])
-    df['TIME'] = df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)))
-    df = df.drop('ID',axis=1)
-    return df
-
-## get_reaction
-def get_reaction(data):
-    df = []
-    # posts
-    for ele in data['jsmods']['pre_display_requires']:
-        try:
-            df.append([
-                ele[3][1]['__bbox']['variables']['storyID'], # storyID
-                ele[3][1]['__bbox']['result']['data']['feedback']['display_comments_count']['count'],  # display_comments_count
-                ele[3][1]['__bbox']['result']['data']['feedback']['comment_count']['total_count'], # total_comments_count
-                ele[3][1]['__bbox']['result']['data']['feedback']['reaction_count']['count'], # reaction_count
-                ele[3][1]['__bbox']['result']['data']['feedback']['share_count']['count'], # share_count
-                ele[3][1]['__bbox']['result']['data']['feedback']['top_reactions']['edges'], # reactions
-            ])
-        except:
-            pass
-    
-    # vidoes
-    for ele in data['jsmods']['require']:
-        try:
-            
-            df.append([
-                'S:_I'+ele[3][2]['feedbacktarget']['actorid']+':'+ele[3][2]['feedbacktarget']['targetfbid'], # storyID
-                ele[3][2]['feedbacktarget']['commentcount'], # display_comments_count
-                ele[3][2]['feedbacktarget']['commentcount'], # total_comments_count
-                ele[3][2]['feedbacktarget']['likecount'], # likecount
-                ele[3][2]['feedbacktarget']['sharecount'], # sharecount
-                [] # reactions
-            ])
-        except:
-            pass
-    df = pd.DataFrame(df, columns=['storyID','display_comments_count', 'total_comments_count', 'reaction_count', 'share_count', 'reactions'])
-    df['storyID'] = df['storyID'].apply(lambda x: re.sub('S:_I', '',x))
-    df['PAGEID'] = df['storyID'].apply(lambda x: re.split(r':',x)[0])
-    df['POSTID'] = df['storyID'].apply(lambda x: re.split(r':',x)[1])
-    
-    # 
-    def get_reactions(reactname, reactions):
-        for react in reactions:
-            if reactname in str(react):
-                return react['reaction_count']
-        return 0
-    df['LIKE'] = df['reactions'].apply(lambda x: get_reactions('LIKE', x))
-    df['LOVE'] = df['reactions'].apply(lambda x: get_reactions('LOVE', x))
-    df['HAHA'] = df['reactions'].apply(lambda x: get_reactions('HAHA', x))
-    df['SUPPORT'] = df['reactions'].apply(lambda x: get_reactions('SUPPORT', x))
-    df['WOW'] = df['reactions'].apply(lambda x: get_reactions('WOW', x))
-    df['ANGER'] = df['reactions'].apply(lambda x: get_reactions('ANGER', x))
-    df['SORRY'] = df['reactions'].apply(lambda x: get_reactions('SORRY', x))
-    
-    # for vidoe's tpye post
-    df['LIKE'] = np.select(condlist = [df['reactions'].apply(lambda x: len(x)==0)], 
-                           choicelist=[df['reaction_count']], 
-                           default=df['LIKE'])
-    return df
-
 # Crawl_PagePosts
 def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
-    pageid = get_pageid(pageurl) 
+    page_id = pagecrawler.get_pageid(pageurl) 
+    timeline_cursor = ''
 
     content_df = [] # post
     feedback_df = [] # reactions
-    timeline_cursor = ''
+    
     max_date =  datetime.datetime.now()
     break_times = 0
-    
+    rs = requests.session()
     # request date and break loop when reach the goal 
     while max_date >= datetime.datetime.strptime(until_date, '%Y-%m-%d'):
         
-        # request params
-        url = 'https://www.facebook.com/pages_reaction_units/more/'
-        params = {'page_id': pageid,
-                  'cursor': str({"timeline_cursor":timeline_cursor,
-                                 "timeline_section_cursor":'{}',
-                                 "has_next_page":'true'}), 
-                  'surface': 'www_pages_home',
-                  'unit_count': 20,
-                  '__a': '1'}
-
         try:
-            resp = requests.get(url, params=params)
+            url = 'https://www.facebook.com/pages_reaction_units/more/'
+            params = {'page_id': page_id,
+                       'cursor': str({"timeline_cursor":timeline_cursor,
+                                       "timeline_section_cursor":'{}',
+                                       "has_next_page":'true'}), 
+                        'surface': 'www_pages_home',
+                        'unit_count': 20,
+                        '__a': '1'}
+            resp = rs.get(url, params=params)
             data = json.loads(re.sub(r'for \(;;\);','',resp.text))
             
             # contesnts：poster's name, poster's ID, post ID, time, content
-            ndf = parse_content(data=data)
+            ndf = pageparser.parse_content(data=data)
             content_df.append(ndf)
 
             # reactions
-            ndf1 = get_reaction(data=data)
+            ndf1 = pageparser.get_reaction(data=data)
             feedback_df.append(ndf1)
   
             # update request params
             max_date = ndf['TIME'].max()
             print('TimeStamp: {}.'.format(ndf['TIME'].max()))
-            timeline_cursor = re.findall(r'timeline_cursor\\u002522\\u00253A\\u002522(.*?)\\u002522\\u00252C\\u002522timeline_section_cursor',resp.text)[0]
+            timeline_cursor = re.findall(r'timeline_cursor%22%3A%22(.*?)%22%2C%22timeline_section_cursor', data['domops'][0][3]['__html'])[0]
             # break times to zero
             break_times = 0
 
         except:
             break_times += 1
             print('break_times:', break_times)
+            time.sleep(3)
         
         time.sleep(2)
         if break_times > 5:
