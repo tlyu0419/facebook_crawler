@@ -9,6 +9,9 @@ import numpy as np
 from facebook_crawler.engine.crawler import pagecrawler
 from facebook_crawler.engine.parser import pageparser
 
+print("This project is developed by tlyu0419. It's welcome to support this project by donating, stating, or sharing if you like it.")
+
+
 # Fans page ==================================================================
 
 # Crawl_PagePosts
@@ -31,7 +34,8 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
                        'cursor': str({"timeline_cursor":timeline_cursor,
                                        "timeline_section_cursor":'{}',
                                        "has_next_page":'true'}), 
-                        'surface': 'www_pages_home',
+                        # 'surface': 'www_pages_home',
+                        'surface': 'www_pages_posts',
                         'unit_count': 20,
                         '__a': '1'}
             resp = rs.get(url, params=params)
@@ -64,6 +68,7 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
     # join content and reactions
     content_df = pd.concat(content_df, ignore_index=True)
     feedback_df = pd.concat(feedback_df, ignore_index=True)
+    
     df = pd.merge(left=content_df, right=feedback_df, how='left', on=['PAGEID', 'POSTID'])
     df = df.loc[:,['NAME', 'TIME', 'CONTENT', 'PAGEID', 'POSTID', 'display_comments_count', 'total_comments_count', 'reaction_count', 'share_count', 'LIKE', 'LOVE', 'HAHA', 'SUPPORT', 'WOW', 'ANGER', 'SORRY']]
     df = df.rename(columns={'display_comments_count':'DISPLAYCOMMENTS', 'total_comments_count':'TOTAL_COMMENTS', 'reaction_count':'REACTIONS','share_count':'SHARES'})

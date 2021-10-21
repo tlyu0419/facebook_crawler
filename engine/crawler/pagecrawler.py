@@ -12,4 +12,3 @@ def get_pageid(pageurl):
         return pageid
     except:
         print('Error at get_pageid stage, please check the fanspage could visit in private mode.')
-
