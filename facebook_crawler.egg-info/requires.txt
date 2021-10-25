@@ -1,5 +1,0 @@
-bs4
-lxml
-numpy
-pandas
-requests

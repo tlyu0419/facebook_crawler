@@ -60,7 +60,7 @@ The project can help us collect the data from Facebook's public Fanspage / group
   Nope! It's related to Facebook's website framework. You need to collect the data from the newest post to the older post.
 
 ## License
-- [Apache License 2.0](https://github.com/TLYu0419/facebook_crawler/blob/main/LICENSE)
+- [MIT License](https://github.com/TLYu0419/facebook_crawler/blob/main/LICENSE)
 - 本專案提供的所有內容均用於教育、非商業用途。本專案不對資料內容錯誤、更新延誤或傳輸中斷負任何責任。
 
 ## Contact Info

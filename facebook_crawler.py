@@ -6,10 +6,7 @@ import time
 import datetime
 import pandas as pd
 import numpy as np
-from facebook_crawler.engine.crawler import pagecrawler
-from facebook_crawler.engine.parser import pageparser
 
-print("This project is developed by tlyu0419. It's welcome to support this project by donating, stating, or sharing if you like it.")
 
 
 # Fans page ==================================================================
