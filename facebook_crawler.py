@@ -13,6 +13,8 @@ import urllib
 def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
     
     # init parameters
+    headers = {'accept': 'text/html',
+               'sec-fetch-user': '?1'}
     rs = requests.Session()
     content_df = [] # post
     feedback_df = [] # reactions
@@ -21,11 +23,11 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
     max_date =  datetime.datetime.now().strftime('%Y-%m-%d')
     
     # Get PageID
+    resp = rs.get(pageurl, headers=headers)
     try:
-        resp = rs.get(pageurl)
         pageid = re.findall('page_id=(.*?)"',resp.text)[0]
     except:
-        print('Error at stage1: get pageid.')
+        pageid = re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)[0]
     
     # request date and break loop when reach the goal 
     while max_date >= until_date:
@@ -100,7 +102,7 @@ def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
         except:
             break_times += 1
             print('break_times:', break_times)
-            if break_times > 10:
+            if break_times > 5:
                 break
         time.sleep(4)
 
@@ -162,7 +164,7 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
         except:
             print('Error at josn.load stage.')
             return resp
-        soup = BeautifulSoup(resp['payload']['actions'][0]['html'])
+        soup = BeautifulSoup(resp['payload']['actions'][0]['html'], "lxml")
         reactions = re.findall('\(new \(require\("ServerJS"\)\)\(\)\).handle\((.*?)\);', resp['payload']['actions'][2]['code'])[0]
         
         try:
