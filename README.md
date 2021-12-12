@@ -3,7 +3,9 @@
 [![Downloads](https://pepy.tech/badge/facebook-crawler/month)](https://pepy.tech/project/facebook-crawler)
 [![Downloads](https://pepy.tech/badge/facebook-crawler/week)](https://pepy.tech/project/facebook-crawler)
 - The project is developed by TENG-LIN YU(游騰林). 
-- Any suggestions are good and feel free to contact me.
+- Please feel free to contact me if you have any suggestions/problems.
+
+
 
 ## Support
 
@@ -12,6 +14,8 @@
 **Donate is not required to utilize this package**, but it would be great to get your support. Either donate, star, or share are good for me. Your support will keep me in maintaining and develop more functions in this project.
 
 **贊助不是使用這個套件的必要條件**，但如能獲得你的支持我將會非常感謝。不論是贊助、給予星星或跟朋友分享對我來說都是非常好的支持方式。有你的支持我才能繼續在這個專案中維護和開發新的功能。
+
+
 
 ## What's this?
 
@@ -70,7 +74,14 @@ The project can help us collect the data from Facebook's public Fanspage / group
 - PYPI: https://pypi.org/project/facebook-crawler/
 - Github: https://github.com/TLYu0419/facebook_crawler
 
-## To Do
+
+
+## Log
+
+- 0.1.0
+  1. Adjust request data method from request.Session.get to request.get to avoid block IP by Facebook.
+  2. Add cookie information during crawling Fanspage data to avoid blocking IP by Facebook.
+
 - GUI interface
 - Database
 
