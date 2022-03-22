@@ -3,7 +3,7 @@
 [![Downloads](https://pepy.tech/badge/facebook-crawler/month)](https://pepy.tech/project/facebook-crawler)
 [![Downloads](https://pepy.tech/badge/facebook-crawler/week)](https://pepy.tech/project/facebook-crawler)
 - The project is developed by TENG-LIN YU(游騰林). 
-- Please feel free to contact me if you have any suggestions/problems.
+- Please feel free to contact me if you have any suggestions or problems.
 
 
 
@@ -11,7 +11,7 @@
 
 [![ecgo.png](https://raw.githubusercontent.com/TLYu0419/facebook_crawler/main/images/ecgo.png)](https://payment.ecpay.com.tw/QuickCollect/PayData?GcM4iJGUeCvhY%2fdFqqQ%2bFAyf3uA10KRo%2fqzP4DWtVcw%3d)
 
-**Donate is not required to utilize this package**, but it would be great to get your support. Either donate, star, or share are good for me. Your support will keep me in maintaining and develop more functions in this project.
+**Donate is not required to utilize this package**, but it would be great to have your support. Either donate, star or share are good to me. Your support will help me keep maintaining and developing in this project
 
 **贊助不是使用這個套件的必要條件**，但如能獲得你的支持我將會非常感謝。不論是贊助、給予星星或跟朋友分享對我來說都是非常好的支持方式。有你的支持我才能繼續在這個專案中維護和開發新的功能。
 
@@ -54,6 +54,7 @@ The project can help us collect the data from Facebook's public Fanspage / group
 
 ## FAQ
 - **Could you please release the function that can collect comments content instead of only the number of comments?**
+  Please write an E-mail to me and tell me your project goal, thanks!
 
 - **How can I find out the post's link through the data?**
   
@@ -78,10 +79,5 @@ The project can help us collect the data from Facebook's public Fanspage / group
 
 ## Log
 
-- 0.1.0
-  1. Adjust request data method from request.Session.get to request.get to avoid block IP by Facebook.
-  2. Add cookie information during crawling Fanspage data to avoid blocking IP by Facebook.
-
-- GUI interface
-- Database
-
+- 0.0.26
+  1. Auto changes the cookie after it's expired to keep crawling data without changing IP.
