@@ -2,151 +2,212 @@ import requests
 import re
 import json
 from bs4 import BeautifulSoup
-import time
 import datetime
+import time
 import pandas as pd
-import numpy as np
-import urllib
 
+def __get_cookieid__(pageurl):
+    '''
+    Send a request to get cookieid as headers.
+    '''
+    pageurl = re.sub('www', 'm', pageurl)
+    resp = requests.get(pageurl)
+    headers={'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+             'accept-language': 'en'}
+    headers['cookie'] = '; '.join(['{}={}'.format(cookieid, resp.cookies.get_dict()[cookieid]) for cookieid in resp.cookies.get_dict()])
+    headers['ec-ch-ua-platform'] = 'Windows'
+    # headers['cookie'] = headers['cookie'] + '; locale=en_US'
+    return headers
 
-# ============== Fanspage ==============
-def Crawl_PagePosts(pageurl, until_date='2019-01-01'):
+def __get_pageid__(pageurl):
+    '''
+    Send a request to Facebook Server to get the pageid, docid and request name.
+    '''
+    pageurl = re.sub('/$', '', pageurl)
+    headers = __get_cookieid__(pageurl)
+    time.sleep(1)
     
-    # init parameters
-    headers = {'accept': 'text/html',
-               'sec-fetch-user': '?1'}
-    content_df = [] # post
-    feedback_df = [] # reactions
-    timeline_cursor = ''
-    break_times = 0
-    max_date =  datetime.datetime.now().strftime('%Y-%m-%d')
-    
-    # Get PageID
-    resp = requests.get(pageurl, headers=headers)
-    try:
-        pageid = re.findall('page_id=(.*?)"',resp.text)[0]
-    except:
+    resp = requests.get(pageurl, headers)
+    # pageID
+    if len(re.findall('"pageID":"([0-9]{1,})",', resp.text)) >= 1:
+        pageid = re.findall('"pageID":"([0-9]{1,})",', resp.text)[0]
+    elif len(re.findall(r'"identifier":(.*?),', resp.text)) >= 1:
+        pageid = re.findall(r'"identifier":(.*?),', resp.text)[0]
+    elif len(re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)) >= 1:
         pageid = re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)[0]
-    print('PageID: ', pageid)
-    
-    
-    headers = {'cookie': f'datr=pythonbot{max_date}',
-               # 'cookie': 'sb=XJI4Ynaw_qr1P1gBdK1VnEEj; wd=1614x866; dpr=1.190000057220459; datr=XJI4Yvcsp47lcXC0lVWz8F3j; fr=0nobUQbC6ldoy3Who..BiOJJc.VY.AAA.0.0.BiOJJj.AWWCprC5HJY',
-               }
+    else:
+        pageid = ''
+    print('{}\'s pageid is: {}'.format(pageurl.split('/', -1)[-1], pageid))
+
+    # postid
+    soup = BeautifulSoup(resp.text, 'lxml')
+    for js in soup.findAll('link', {'rel':'preload'}):
+        resp = requests.get(js['href'])
+        for line in resp.text.split('\n', -1):
+            if 'ProfileCometTimelineFeedRefetchQuery_' in line:
+                docid = re.findall('e.exports="([0-9]{1,})"', line)[0]
+                req_name = 'ProfileCometTimelineFeedRefetchQuery'
+                break
             
+            if 'CometModernPageFeedPaginationQuery_' in line:
+                docid = re.findall('e.exports="([0-9]{1,})"', line)[0]
+                req_name = 'CometModernPageFeedPaginationQuery'
+                break
+            
+            if 'CometUFICommentsProviderQuery_' in line:
+                docid = re.findall('e.exports="([0-9]{1,})"', line)[0]
+                req_name = 'CometUFICommentsProviderQuery'
+                break
+    print('{}\'s docid is: {}'.format(pageurl.split('/', -1)[-1], docid))
+
+    return pageid, docid, req_name
+
+def __parsing_edge__(edge):
+    # name
+    name = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['name']
+    # creation_time
+    creation_time = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['metadata'][0]['story']['creation_time']
+    # message
+    message = edge['node']['comet_sections']['content']['story']['comet_sections']['message']['story']['message']['text']
+    # postid
+    postid = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['subscription_target_id']
+    # actorid
+    pageid = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['id']
+    # comment_count
+    comment_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comment_count']['total_count']
+    # reaction_count
+    reaction_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['reaction_count']['count']
+    # share_count
+    share_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['share_count']['count']
+    # reactors
+    # reactors = comet_sections['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['cannot_see_top_custom_reactions']['reactors']['count']
+    # toplevel_comment_count
+    toplevel_comment_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['toplevel_comment_count']['count']
+    # top_reactions
+    top_reactions = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['cannot_see_top_custom_reactions']['top_reactions']['edges']
+    # cursor
+    cursor = edge['cursor']
+    # url
+    url = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['url']
+    return [name, creation_time, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url]
+
+def __parsing_ProfileComet__(resp):
+    edge_list = []
+    resps = resp.text.split('\r\n', -1)
+    for i, res in enumerate(resps):
+        # print(i)
+        try:
+            edge = json.loads(res)['data']['node']['timeline_list_feed_units']['edges'][0]
+            edge = __parsing_edge__(edge)
+            edge_list.append(edge)
+            
+        except:
+            pass
+        try:
+            edge = json.loads(res)['data']
+            edge = __parsing_edge__(edge)
+            edge_list.append(edge)
+        except:
+            pass      
+
+    max_date = max([edge[1] for edge in edge_list])
+    max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
+    cursor = edge_list[-1][-2]
+    print('The maximum date of these posts is: {}, keep crawling...'.format(max_date))
+    return edge_list, cursor, max_date
+
+def __parsing_CometModern__(resp):
+    edge_list = []
+    resp = json.loads(resp.text.split('\r\n', -1)[0])
+    
+    for edge in resp['data']['node']['timeline_feed_units']['edges']:
+        try:
+            edge = __parsing_edge__(edge)
+            edge_list.append(edge)
+        except:
+            pass
+        
+    max_date = max([edge[1] for edge in edge_list])
+    max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
+    print('The maximum date of these posts is: {}, keep crawling...'.format(max_date))
+    cursor = edge_list[-1][-2]
+    return edge_list, cursor, max_date
+
+def __extract_reactions__(reactions, reaction_type):
+    '''
+    Extract reaction_type from reactions.
+    Possible reaction_type's value will be one of ['LIKE', 'HAHA', 'WOW', 'LOVE', 'SUPPORT', 'SORRY', 'ANGER'] 
+    '''
+    for reaction in reactions:
+        if reaction['node']['localized_name'].upper() == reaction_type.upper():
+            return reaction['reaction_count']
+    return 0
+
+
+def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
+    # init parameters
+    contents = [] # post
+    cursor = ''
+    max_date =  datetime.datetime.now().strftime('%Y-%m-%d')
+    break_times = 0
+    
+    headers = __get_cookieid__(pageurl)
+    # Get pageid, postid and reqname
+    pageid, docid, req_name = __get_pageid__(pageurl)
+
     # request date and break loop when reach the goal 
     while max_date >= until_date:
-        # request params
-        url = 'https://www.facebook.com/pages_reaction_units/more/'
-        params = {'page_id': pageid,
-                  'cursor': str({"timeline_cursor":timeline_cursor,
-                                 "timeline_section_cursor":'{}',
-                                 "has_next_page":'true'}), 
-                  'surface': 'www_pages_posts',
-                  'unit_count': 20,
-                  '__a': '1'}
+        # Rate limit exceeded
+        # time.sleep(0.5) 
+        data = {'variables': str({"count":'3',
+                                  "cursor": cursor,
+                                  'id':pageid}),
+                'doc_id':docid}
         try:
-            
-            resp = requests.get(url, params=params, headers=headers)  
-            # print(headers['cookie'])
-            data = json.loads(re.sub(r'for \(;;\);','',resp.text))
-
-            # Post info: poster's name, poster's ID, post ID, time, content
-            soup = BeautifulSoup(data['domops'][0][3]['__html'], 'lxml')
-            # print(len(soup.findAll('div', {'class':'userContentWrapper'})))
-            for content in soup.findAll('div', {'class':'userContentWrapper'}):
-                # message
-                message = content.find('div', {'data-testid':'post_message'})
-                try:
-                    message = ''.join(p.text for p in message.findAll('p'))
-                except:
-                    message = ''
-                    
-                content_df.append([
-                    content.find('img')['aria-label'], # name
-                    content.find('div', {'data-testid':'story-subtitle'})['id'], # id
-                    content.find('abbr')['data-utime'], #time
-                    message, # message
-                    content.find('a')['href'].split('?')[0] #link
-                ]) 
-                                   
-            # reactions--normal post
-            for mod in data['jsmods']['pre_display_requires']:
-                try:
-                    feedback_df.append([
-                        mod[3][1]['__bbox']['result']['data']['feedback']['subscription_target_id'], # post id
-                        mod[3][1]['__bbox']['result']['data']['feedback']['owning_profile']['id'], # page id
-                        mod[3][1]['__bbox']['result']['data']['feedback']['comment_count']['total_count'], # comment_count
-                        mod[3][1]['__bbox']['result']['data']['feedback']['reaction_count']['count'], # reaction_count
-                        mod[3][1]['__bbox']['result']['data']['feedback']['share_count']['count'], # share_count
-                        mod[3][1]['__bbox']['result']['data']['feedback']['top_reactions']['edges'], # reactions
-                        mod[3][1]['__bbox']['result']['data']['feedback']['display_comments_count']['count'] # display_comments_count
-                    ])
-                except:
-                    pass
-            
-            # reactions--video post
-            for mod in data['jsmods']['require']:
-                try:
-                    feedback_df.append([
-                        mod[3][2]['feedbacktarget']['entidentifier'], # post id
-                        mod[3][2]['feedbacktarget']['actorid'], # page id
-                        mod[3][2]['feedbacktarget']['commentcount'], # comment count
-                        mod[3][2]['feedbacktarget']['likecount'], # reaction count
-                        mod[3][2]['feedbacktarget']['sharecount'], # sharecount
-                        [], # reactions
-                        mod[3][2]['feedbacktarget']['commentcount'] # display_comments_count
-                    ])
-                except:
-                    pass
-
-            # update request params
-            max_date = max([time['data-utime'] for time in soup.findAll('abbr')])
-            max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
-            print(f'TimeStamp: {max_date}.')
-            timeline_cursor = re.findall(r'timeline_cursor\\u002522\\u00253A\\u002522(.*?)\\u002522\\u00252C\\u002522timeline_section_cursor',resp.text)[0]
+            resp = requests.post(url = 'https://www.facebook.com/api/graphql/', 
+                                 data=data, 
+                                 headers=headers)
+#             print(req_name)
+            if req_name == 'ProfileCometTimelineFeedRefetchQuery':
+                edge_list, cursor, max_date = __parsing_ProfileComet__(resp)
+            elif req_name == 'CometModernPageFeedPaginationQuery':
+                edge_list, cursor, max_date = __parsing_CometModern__(resp)
+            contents = contents + edge_list
+            # print('append')
             # break times to zero
             break_times = 0
         except:
+            print('Break Times {}: Something went wrong with this request. Sleep 15 seconds and retry to request new posts.'.format(break_times))
+            print('REQUEST LOG >>  pageid: {}, docid: {}, cursor: {}'.format(pageid, docid, cursor))
+            print('RESPONSE LOG: ', resp.text[:3000])
             break_times += 1
-            print('break_times:', break_times)
+            time.sleep(15)
             # Get New cookie ID
-            resp = requests.get(re.sub('www', 'm', pageurl))
-            datr = resp.cookies.get_dict()['datr']
-            print('change datr' )
-            headers['cookie'] = f'datr={datr}'
-            
-            if break_times > 5:
-                break
-        # time.sleep(4)
+            headers = __get_cookieid__(pageurl)
 
-    # join content and reactions
-    content_df = pd.DataFrame(content_df, columns=['NAME', 'ID', 'TIME', 'MESSAGE', 'LINK'])
+            if break_times > 15:
+                print('Please check your target fanspage has up to date.')
+                print('If so, you can ignore this break time message, if not, please change your Internet IP and retun this crawler.')
+                break
+#                 return resp, data
+    # Join content and requires
+    df = pd.DataFrame(contents, columns = ['NAME', 'TIME', 'MESSAGE', 'POSTID', 'PAGEID', 'COMMENT_COUNT', 'REACTION_COUNT', 'SHARE_COUNT', 'DISPLAYCOMMENTCOUNT', 'REACTIONS', 'CURSOR', 'URL'])
+
+    reaction_type = []
+    for reactions in df['REACTIONS']:
+        if len(reactions) >= 1:
+            for reaction in reactions:
+                if reaction['node']['localized_name'] not in reaction_type:
+                    reaction_type.append(reaction['node']['localized_name'])
+    reaction_type = [reaction.upper() for reaction in reaction_type]
+    for reaction in reaction_type:
+        df[reaction] = df['REACTIONS'].apply(lambda x: __extract_reactions__(x, reaction))
     
-    def take_id(string, num):
-        try:
-            return re.findall('[0-9]{5,}', string)[num]
-        except:
-            return re.findall('[0-9]{5,}', string)[num-1]
-    content_df['PAGEID'] = content_df['ID'].apply(lambda x: take_id(x, 0))
-    content_df['POSTID'] = content_df['ID'].apply(lambda x: take_id(x, 1))
-    content_df['TIME'] = content_df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d %H:%M:%S"))
-    
-    feedback_df = pd.DataFrame(feedback_df, columns=['POSTID', 'PAGEID', 'COMMENTCOUNT', 'REACTIONCOUNT', 'SHARECOUNT', 'REACTIONS', 'DISPLAYCOMMENTCOUNT'])
-    
-    reaction_df = feedback_df.loc[:,['PAGEID', 'POSTID', 'REACTIONS']].explode('REACTIONS')
-    reaction_df = reaction_df.loc[reaction_df['REACTIONS'].notnull()]
-    reaction_df['COUNT'] = reaction_df['REACTIONS'].apply(lambda x: x['reaction_count'])
-    reaction_df['TYPE'] = reaction_df['REACTIONS'].apply(lambda x: x['node']['reaction_type'])
-    reaction_df = reaction_df.drop_duplicates(['PAGEID', 'POSTID', 'TYPE'], keep='first')
-    reaction_df = reaction_df.pivot(index=['PAGEID', 'POSTID'], columns='TYPE', values='COUNT').reset_index()
-    
-    df = pd.merge(left=content_df, right=feedback_df, how='left', on=['POSTID', 'PAGEID'])
-    df = pd.merge(left=df, right=reaction_df, how='left', on=['POSTID', 'PAGEID'])
-    df = df.drop(['ID', 'REACTIONS'], axis=1)
-    df = df.fillna(value={'ANGER':0, 'HAHA':0, 'LIKE': 0, 'LOVE':0, 'SORRY':0, 'SUPPORT':0, 'WOW': 0}) 
+    df = df.drop('REACTIONS', axis=1)
+    df['TIME'] = df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d %H:%M:%S"))
     df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")      
     return df
+
 
 
 # ============== Group ==============
@@ -179,15 +240,11 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
             }
         resp = rs.post(groupurl, headers=headers, params=params, data=data)
         resp = re.sub(r'for \(;;\);', '', resp.text)
-        try:
-            resp = json.loads(resp)
-        except:
-            print('Error at josn.load stage.')
-            return resp
-        soup = BeautifulSoup(resp['payload']['actions'][0]['html'], "lxml")
-        reactions = re.findall('\(new \(require\("ServerJS"\)\)\(\)\).handle\((.*?)\);', resp['payload']['actions'][2]['code'])[0]
         
         try:
+            resp = json.loads(resp)
+            soup = BeautifulSoup(resp['payload']['actions'][0]['html'], "lxml")
+            reactions = re.findall('\(new \(require\("ServerJS"\)\)\(\)\).handle\((.*?)\);', resp['payload']['actions'][2]['code'])[0]
             # Parse content
             for post in soup.select('section > article'):
                 try:
@@ -224,14 +281,17 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
             break_times += 1
             print('break_times:', break_times)
             if break_times > 5:
-                return soup.select('div > a.primary')[0]['href']
+                return resp
+                # return soup.select('div > a.primary')[0]['href']
                 # return print('ERROR: Please send the following URL to the author. \n', rs.url)
-        time.sleep(4)    
+        # time.sleep(4)    
     # join content and reactions
     content_df = pd.DataFrame(content_df, columns=['ACTORID','NAME', 'GROUPID', 'POSTID','TIME', 'CONTENT'])
+    content_df['ACTORID'] = content_df['ACTORID'].apply(lambda x: re.sub('"', '', x))
     content_df['TIME'] = content_df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d %H:%M:%S"))
     
     feedback_df = pd.DataFrame(feedback_df, columns=['POSTID', 'COMMENTCOUNT',  'SHARECOUNT', 'LIKECOUNT'])
+    feedback_df['POSTID'] = feedback_df['POSTID'].apply(lambda x: str(x))
     
     df = pd.merge(left=content_df, right=feedback_df, how='left', on='POSTID')
     df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")  
