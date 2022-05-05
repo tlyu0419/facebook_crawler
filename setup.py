@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="facebook_crawler",
-  version="0.0.27",
+  version="0.0.28",
   author="TENG-LIN YU",
   author_email="tlyu0419@gmail.com",
   description="Facebook crawler package can help you crawl the posts on public fanspages and groups from Facebook.",

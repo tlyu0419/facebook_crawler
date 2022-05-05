@@ -158,7 +158,7 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
     # request date and break loop when reach the goal 
     while max_date >= until_date:
         # Rate limit exceeded
-        # time.sleep(0.5) 
+        time.sleep(1) 
         data = {'variables': str({"count":'3',
                                   "cursor": cursor,
                                   'id':pageid}),
@@ -284,7 +284,7 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
                 return resp
                 # return soup.select('div > a.primary')[0]['href']
                 # return print('ERROR: Please send the following URL to the author. \n', rs.url)
-        # time.sleep(4)    
+        time.sleep(4)    
     # join content and reactions
     content_df = pd.DataFrame(content_df, columns=['ACTORID','NAME', 'GROUPID', 'POSTID','TIME', 'CONTENT'])
     content_df['ACTORID'] = content_df['ACTORID'].apply(lambda x: re.sub('"', '', x))
