@@ -64,31 +64,30 @@ def __get_pageid__(pageurl):
 
 def __parsing_edge__(edge):
     # name
-    name = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['name']
+    comet_sections_ = edge['node']['comet_sections']
+    name = comet_sections_['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['name']
     # creation_time
-    creation_time = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['metadata'][0]['story']['creation_time']
+    creation_time = comet_sections_['context_layout']['story']['comet_sections']['metadata'][0]['story']['creation_time']
     # message
-    message = edge['node']['comet_sections']['content']['story']['comet_sections']['message']['story']['message']['text']
+    message = comet_sections_['content']['story']['comet_sections'].get('message','').get('story','').get('message','').get('text','') if comet_sections_['content']['story']['comet_sections'].get('message','') else ''
     # postid
-    postid = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['subscription_target_id']
+    postid = comet_sections_['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['subscription_target_id']
     # actorid
-    pageid = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['id']
+    pageid = comet_sections_['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['id']
     # comment_count
-    comment_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comment_count']['total_count']
+    comment_count = comet_sections_['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comment_count']['total_count']
     # reaction_count
-    reaction_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['reaction_count']['count']
+    reaction_count = comet_sections_['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['reaction_count']['count']
     # share_count
-    share_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['share_count']['count']
-    # reactors
-    # reactors = comet_sections['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['cannot_see_top_custom_reactions']['reactors']['count']
+    share_count = comet_sections_['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['share_count']['count']
     # toplevel_comment_count
-    toplevel_comment_count = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['toplevel_comment_count']['count']
+    toplevel_comment_count = comet_sections_['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['toplevel_comment_count']['count']
     # top_reactions
-    top_reactions = edge['node']['comet_sections']['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['cannot_see_top_custom_reactions']['top_reactions']['edges']
+    top_reactions = comet_sections_['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['cannot_see_top_custom_reactions']['top_reactions']['edges']
     # cursor
     cursor = edge['cursor']
     # url
-    url = edge['node']['comet_sections']['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['url']
+    url = comet_sections_['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['url']
     return [name, creation_time, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url]
 
 def __parsing_ProfileComet__(resp):
@@ -119,13 +118,13 @@ def __parsing_ProfileComet__(resp):
 def __parsing_CometModern__(resp):
     edge_list = []
     resp = json.loads(resp.text.split('\r\n', -1)[0])
-    
+
     for edge in resp['data']['node']['timeline_feed_units']['edges']:
         try:
             edge = __parsing_edge__(edge)
             edge_list.append(edge)
-        except:
-            pass
+        except Exception as e:
+            raise e
         
     max_date = max([edge[1] for edge in edge_list])
     max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
@@ -167,16 +166,21 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             resp = requests.post(url = 'https://www.facebook.com/api/graphql/', 
                                  data=data, 
                                  headers=headers)
-#             print(req_name)
+            has_next_page = resp.json()['data']['node']['timeline_feed_units']['page_info']['has_next_page']
+            if not has_next_page:
+                raise UnboundLocalError(f"Reached the last page")
             if req_name == 'ProfileCometTimelineFeedRefetchQuery':
                 edge_list, cursor, max_date = __parsing_ProfileComet__(resp)
             elif req_name == 'CometModernPageFeedPaginationQuery':
                 edge_list, cursor, max_date = __parsing_CometModern__(resp)
             contents = contents + edge_list
-            # print('append')
+
             # break times to zero
             break_times = 0
-        except:
+        except UnboundLocalError:
+            print("Reached the last page")
+
+        except Exception as e:
             print('Break Times {}: Something went wrong with this request. Sleep 15 seconds and retry to request new posts.'.format(break_times))
             print('REQUEST LOG >>  pageid: {}, docid: {}, cursor: {}'.format(pageid, docid, cursor))
             print('RESPONSE LOG: ', resp.text[:3000])
@@ -189,7 +193,7 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
                 print('Please check your target fanspage has up to date.')
                 print('If so, you can ignore this break time message, if not, please change your Internet IP and retun this crawler.')
                 break
-#                 return resp, data
+
     # Join content and requires
     df = pd.DataFrame(contents, columns = ['NAME', 'TIME', 'MESSAGE', 'POSTID', 'PAGEID', 'COMMENT_COUNT', 'REACTION_COUNT', 'SHARE_COUNT', 'DISPLAYCOMMENTCOUNT', 'REACTIONS', 'CURSOR', 'URL'])
 
@@ -202,10 +206,10 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
     reaction_type = [reaction.upper() for reaction in reaction_type]
     for reaction in reaction_type:
         df[reaction] = df['REACTIONS'].apply(lambda x: __extract_reactions__(x, reaction))
-    
+
     df = df.drop('REACTIONS', axis=1)
     df['TIME'] = df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d %H:%M:%S"))
-    df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")      
+    df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return df
 
 
