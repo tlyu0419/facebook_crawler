@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 import datetime
 import time
 import pandas as pd
+from dicttoxml import dicttoxml
+from lxml import etree
 
 def __get_cookieid__(pageurl):
     '''
@@ -88,7 +90,18 @@ def __parsing_edge__(edge):
     cursor = edge['cursor']
     # url
     url = comet_sections_['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['url']
-    return [name, creation_time, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url]
+
+    # attachments
+    attachments = get_attachment(comet_sections_)
+
+    return [name, creation_time, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url, attachments]
+
+
+def get_attachment(comet_sections_):
+    xml_data = dicttoxml(comet_sections_, attr_type=False)
+    tree = etree.fromstring(xml_data)
+    attachments = tree.xpath('//uri/text()')
+    return attachments
 
 def __parsing_ProfileComet__(resp):
     edge_list = []
@@ -208,7 +221,7 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
                 break
 
     # Join content and requires
-    df = pd.DataFrame(contents, columns = ['NAME', 'TIME', 'MESSAGE', 'POSTID', 'PAGEID', 'COMMENT_COUNT', 'REACTION_COUNT', 'SHARE_COUNT', 'DISPLAYCOMMENTCOUNT', 'REACTIONS', 'CURSOR', 'URL'])
+    df = pd.DataFrame(contents, columns = ['NAME', 'TIME', 'MESSAGE', 'POSTID', 'PAGEID', 'COMMENT_COUNT', 'REACTION_COUNT', 'SHARE_COUNT', 'DISPLAYCOMMENTCOUNT', 'REACTIONS', 'CURSOR', 'URL', 'ATTACHMENTS'])
 
     reaction_type = []
     for reactions in df['REACTIONS']:
