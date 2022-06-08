@@ -143,6 +143,12 @@ def __extract_reactions__(reactions, reaction_type):
     return 0
 
 
+def has_next_page(resp):
+    resp = json.loads(resp.text.split('\r\n', -1)[0])
+    has_next_page = resp['data']['node']['timeline_feed_units'].get('page_info').get('has_next_page')
+    return has_next_page
+
+
 def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
     # init parameters
     contents = [] # post
@@ -166,8 +172,7 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             resp = requests.post(url = 'https://www.facebook.com/api/graphql/', 
                                  data=data, 
                                  headers=headers)
-            has_next_page = resp.json()['data']['node']['timeline_feed_units']['page_info']['has_next_page']
-            if not has_next_page:
+            if not has_next_page(resp):
                 raise UnboundLocalError(f"Reached the last page")
             if req_name == 'ProfileCometTimelineFeedRefetchQuery':
                 edge_list, cursor, max_date = __parsing_ProfileComet__(resp)
