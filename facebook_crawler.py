@@ -8,6 +8,10 @@ import pandas as pd
 from dicttoxml import dicttoxml
 from lxml import etree
 
+
+class ServerException(Exception):
+    pass
+
 def __get_cookieid__(pageurl):
     '''
     Send a request to get cookieid as headers.
@@ -21,6 +25,7 @@ def __get_cookieid__(pageurl):
     # headers['cookie'] = headers['cookie'] + '; locale=en_US'
     return headers
 
+
 def __get_pageid__(pageurl):
     '''
     Send a request to Facebook Server to get the pageid, docid and request name.
@@ -28,7 +33,7 @@ def __get_pageid__(pageurl):
     pageurl = re.sub('/$', '', pageurl)
     headers = __get_cookieid__(pageurl)
     time.sleep(1)
-    
+
     resp = requests.get(pageurl, headers)
     # pageID
     if len(re.findall('"pageID":"([0-9]{1,})",', resp.text)) >= 1:
@@ -43,19 +48,19 @@ def __get_pageid__(pageurl):
 
     # postid
     soup = BeautifulSoup(resp.text, 'lxml')
-    for js in soup.findAll('link', {'rel':'preload'}):
+    for js in soup.findAll('link', {'rel': 'preload'}):
         resp = requests.get(js['href'])
         for line in resp.text.split('\n', -1):
             if 'ProfileCometTimelineFeedRefetchQuery_' in line:
                 docid = re.findall('e.exports="([0-9]{1,})"', line)[0]
                 req_name = 'ProfileCometTimelineFeedRefetchQuery'
                 break
-            
+
             if 'CometModernPageFeedPaginationQuery_' in line:
                 docid = re.findall('e.exports="([0-9]{1,})"', line)[0]
                 req_name = 'CometModernPageFeedPaginationQuery'
                 break
-            
+
             if 'CometUFICommentsProviderQuery_' in line:
                 docid = re.findall('e.exports="([0-9]{1,})"', line)[0]
                 req_name = 'CometUFICommentsProviderQuery'
@@ -63,6 +68,7 @@ def __get_pageid__(pageurl):
     print('{}\'s docid is: {}'.format(pageurl.split('/', -1)[-1], docid))
 
     return pageid, docid, req_name
+
 
 def __parsing_edge__(edge):
     # name
@@ -120,7 +126,7 @@ def __parsing_ProfileComet__(resp):
             edge = __parsing_edge__(edge)
             edge_list.append(edge)
         except:
-            pass      
+            pass
 
     max_date = max([edge[1] for edge in edge_list])
     max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
@@ -158,24 +164,35 @@ def __extract_reactions__(reactions, reaction_type):
 
 def find_json_path(json, path, sep="."):
     path = path.split(sep)
-    for key in json:
-        json = json.get(key)
+
+    for key in path:
+        json = json.get(key, '')
+        if not json:
+            return ''
     if json:
         return json
+    else:
+        return ''
+
 
 def has_next_page(resp):
     resp = json.loads(resp.text.split('\r\n', -1)[0])
-    has_next_page = find_json_path(resp, 'data.node.timeline_feed_units.page_info.has_next_page')
+
+    if resp['data']['node']['timeline_feed_units']:
+        has_next_page = resp['data']['node']['timeline_feed_units']['page_info']['has_next_page']
+    elif resp.get('errors'):
+        raise ServerException("Error from Server")
+
     return has_next_page
 
 
 def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
     # init parameters
-    contents = [] # post
+    contents = []  # post
     cursor = ''
-    max_date =  datetime.datetime.now().strftime('%Y-%m-%d')
+    max_date = datetime.datetime.now().strftime('%Y-%m-%d')
     break_times = 0
-    
+
     headers = __get_cookieid__(pageurl)
     # Get pageid, postid and reqname
     pageid, docid, req_name = __get_pageid__(pageurl)
@@ -183,14 +200,14 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
     # request date and break loop when reach the goal 
     while max_date >= until_date:
         # Rate limit exceeded
-        time.sleep(1) 
-        data = {'variables': str({"count":'3',
+        time.sleep(1)
+        data = {'variables': str({"count": '3',
                                   "cursor": cursor,
-                                  'id':pageid}),
-                'doc_id':docid}
+                                  'id': pageid}),
+                'doc_id': docid}
         try:
-            resp = requests.post(url = 'https://www.facebook.com/api/graphql/', 
-                                 data=data, 
+            resp = requests.post(url='https://www.facebook.com/api/graphql/',
+                                 data=data,
                                  headers=headers)
             if not has_next_page(resp):
                 raise UnboundLocalError(f"Reached the last page")
@@ -239,38 +256,37 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
     return df
 
 
-
 # ============== Group ==============
 ## Crawl_GroupPosts
 def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
     # init parameters
     rs = requests.Session()
-    content_df = [] # post
-    feedback_df = [] # reactions
+    content_df = []  # post
+    feedback_df = []  # reactions
     bac = ''
     break_times = 0
-    max_date =  datetime.datetime.now().strftime('%Y-%m-%d')
+    max_date = datetime.datetime.now().strftime('%Y-%m-%d')
     headers = {'sec-fetch-site': 'same-origin',
                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36 Edg/96.0.1054.43',
                'x-fb-lsd': 'GoogleBot'}
-    data = {'lsd': 'GoogleBot', 
+    data = {'lsd': 'GoogleBot',
             '__a': 'GoogleBot'}
-    
+
     # redirect to m.facebook
-    groupurl = re.sub('www','m', groupurl)
+    groupurl = re.sub('www', 'm', groupurl)
 
     # request data and break loop until reach the goal 
     while max_date >= until_date:
-        
+
         # request params
         params = {
             'bac': bac,
             'multi_permalinks': '',
             'refid': '18'
-            }
+        }
         resp = rs.post(groupurl, headers=headers, params=params, data=data)
         resp = re.sub(r'for \(;;\);', '', resp.text)
-        
+
         try:
             resp = json.loads(resp)
             soup = BeautifulSoup(resp['payload']['actions'][0]['html'], "lxml")
@@ -279,12 +295,12 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
             for post in soup.select('section > article'):
                 try:
                     content_df.append([
-                        re.findall('"content_owner_id_new":(.*?),', str(post))[0], # ACTORID
-                        post.select('strong > a')[0].text, # NAME
-                        re.findall('"page_id":"(.*?)"', str(post))[0], # GROUPID
-                        re.findall('"mf_story_key":"(.*?)"', str(post))[0], # POSTID
-                        re.findall('"publish_time":(.*?),', str(post))[0], # TIME
-                        post.find('div',{'data-ft':'{"tn":"*s"}'}).text # CONTENT
+                        re.findall('"content_owner_id_new":(.*?),', str(post))[0],  # ACTORID
+                        post.select('strong > a')[0].text,  # NAME
+                        re.findall('"page_id":"(.*?)"', str(post))[0],  # GROUPID
+                        re.findall('"mf_story_key":"(.*?)"', str(post))[0],  # POSTID
+                        re.findall('"publish_time":(.*?),', str(post))[0],  # TIME
+                        post.find('div', {'data-ft': '{"tn":"*s"}'}).text  # CONTENT
                     ])
                 except:
                     pass
@@ -292,10 +308,10 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
             for ele in json.loads(reactions)['require']:
                 if 'counts' in str(ele):
                     feedback_df.append([
-                        ele[3][1]['ft_ent_identifier'], # POSTID
-                        ele[3][1]['comment_count'], # comment_count
-                        ele[3][1]['share_count'], # # share_count
-                        ele[3][1]['like_count'] # like_count
+                        ele[3][1]['ft_ent_identifier'],  # POSTID
+                        ele[3][1]['comment_count'],  # comment_count
+                        ele[3][1]['share_count'],  # # share_count
+                        ele[3][1]['like_count']  # like_count
                     ])
              # Update information
             max_date = max([re.findall('"publish_time":(.*?),', str(time['data-ft']))[0] for time in soup.select('section > article')])
@@ -305,8 +321,8 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
                 bac = re.findall('bac=(.*?)%3D', soup.select('div > a.primary')[0]['href'])[0]
             except:
                 bac = re.findall('bac=(.*?)&', soup.select('div > a.primary')[0]['href'])[0]
-            break_times = 0 # reset break times to zero
-            
+            break_times = 0  # reset break times to zero
+
         except:
             break_times += 1
             print('break_times:', break_times)
@@ -318,11 +334,12 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
     # join content and reactions
     content_df = pd.DataFrame(content_df, columns=['ACTORID','NAME', 'GROUPID', 'POSTID','TIME', 'CONTENT'])
     content_df['ACTORID'] = content_df['ACTORID'].apply(lambda x: re.sub('"', '', x))
-    content_df['TIME'] = content_df['TIME'].apply(lambda x: datetime.datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d %H:%M:%S"))
-    
-    feedback_df = pd.DataFrame(feedback_df, columns=['POSTID', 'COMMENTCOUNT',  'SHARECOUNT', 'LIKECOUNT'])
+    content_df['TIME'] = content_df['TIME'].apply(
+        lambda x: datetime.datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d %H:%M:%S"))
+
+    feedback_df = pd.DataFrame(feedback_df, columns=['POSTID', 'COMMENTCOUNT', 'SHARECOUNT', 'LIKECOUNT'])
     feedback_df['POSTID'] = feedback_df['POSTID'].apply(lambda x: str(x))
-    
+
     df = pd.merge(left=content_df, right=feedback_df, how='left', on='POSTID')
-    df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")  
+    df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return df
