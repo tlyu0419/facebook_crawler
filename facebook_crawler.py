@@ -143,9 +143,16 @@ def __extract_reactions__(reactions, reaction_type):
     return 0
 
 
+def find_json_path(json, path, sep="."):
+    path = path.split(sep)
+    for key in json:
+        json = json.get(key)
+    if json:
+        return json
+
 def has_next_page(resp):
     resp = json.loads(resp.text.split('\r\n', -1)[0])
-    has_next_page = resp['data']['node']['timeline_feed_units'].get('page_info').get('has_next_page')
+    has_next_page = find_json_path(resp, 'data.node.timeline_feed_units.page_info.has_next_page')
     return has_next_page
 
 
@@ -184,6 +191,7 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             break_times = 0
         except UnboundLocalError:
             print("Reached the last page")
+            break
 
         except Exception as e:
             print('Break Times {}: Something went wrong with this request. Sleep 15 seconds and retry to request new posts.'.format(break_times))
