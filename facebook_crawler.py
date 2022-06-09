@@ -100,13 +100,23 @@ def __parsing_edge__(edge):
     # attachments
     attachments = get_attachment(comet_sections_)
 
-    return [name, creation_time, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url, attachments]
+    self_link = get_selflink(comet_sections_)
+
+    return [name, creation_time, self_link, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url, attachments]
 
 def get_attachment(comet_sections_):
     xml_data = dicttoxml(comet_sections_, attr_type=False)
     tree = etree.fromstring(xml_data)
     attachments = tree.xpath('//uri/text()')
     return ','.join(attachments)
+
+def get_selflink(comet_sections_):
+    xml_data = dicttoxml(comet_sections_, attr_type=False)
+    tree = etree.fromstring(xml_data)
+    urls = tree.xpath('//url/text()')
+    selflink = [link for link in urls if link.endswith("type=3")]
+    return ','.join(selflink)
+
 
 def __parsing_ProfileComet__(resp):
     edge_list = []
@@ -233,13 +243,13 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             # Get New cookie ID
             headers = __get_cookieid__(pageurl)
 
-            if break_times > 15:
+            if break_times > 10:
                 print('Please check your target fanspage has up to date.')
                 print('If so, you can ignore this break time message, if not, please change your Internet IP and retun this crawler.')
                 break
 
     # Join content and requires
-    df = pd.DataFrame(contents, columns = ['NAME', 'TIME', 'MESSAGE', 'POSTID', 'PAGEID', 'COMMENT_COUNT', 'REACTION_COUNT', 'SHARE_COUNT', 'DISPLAYCOMMENTCOUNT', 'REACTIONS', 'CURSOR', 'URL', 'ATTACHMENTS'])
+    df = pd.DataFrame(contents, columns = ['NAME', 'TIME', 'SELF_LINK', 'MESSAGE', 'POSTID', 'PAGEID', 'COMMENT_COUNT', 'REACTION_COUNT', 'SHARE_COUNT', 'DISPLAYCOMMENTCOUNT', 'REACTIONS', 'CURSOR', 'URL', 'ATTACHMENTS'])
 
     reaction_type = []
     for reactions in df['REACTIONS']:
@@ -331,7 +341,7 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
                 return resp
                 # return soup.select('div > a.primary')[0]['href']
                 # return print('ERROR: Please send the following URL to the author. \n', rs.url)
-        time.sleep(4)    
+        time.sleep(4)
     # join content and reactions
     content_df = pd.DataFrame(content_df, columns=['ACTORID','NAME', 'GROUPID', 'POSTID','TIME', 'CONTENT'])
     content_df['ACTORID'] = content_df['ACTORID'].apply(lambda x: re.sub('"', '', x))
