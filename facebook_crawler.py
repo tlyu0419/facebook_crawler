@@ -102,12 +102,11 @@ def __parsing_edge__(edge):
 
     return [name, creation_time, message, postid, pageid, comment_count, reaction_count, share_count, toplevel_comment_count, top_reactions, cursor, url, attachments]
 
-
 def get_attachment(comet_sections_):
     xml_data = dicttoxml(comet_sections_, attr_type=False)
     tree = etree.fromstring(xml_data)
     attachments = tree.xpath('//uri/text()')
-    return attachments
+    return ','.join(attachments)
 
 def __parsing_ProfileComet__(resp):
     edge_list = []
@@ -180,8 +179,8 @@ def has_next_page(resp):
 
     if resp['data']['node']['timeline_feed_units']:
         has_next_page = resp['data']['node']['timeline_feed_units']['page_info']['has_next_page']
-    elif resp.get('errors'):
-        raise ServerException("Error from Server")
+    # elif resp.get('errors'):
+    #     raise ServerException("Error from Server")
 
     return has_next_page
 
@@ -209,13 +208,15 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             resp = requests.post(url='https://www.facebook.com/api/graphql/',
                                  data=data,
                                  headers=headers)
-            if not has_next_page(resp):
-                raise UnboundLocalError(f"Reached the last page")
+
             if req_name == 'ProfileCometTimelineFeedRefetchQuery':
                 edge_list, cursor, max_date = __parsing_ProfileComet__(resp)
             elif req_name == 'CometModernPageFeedPaginationQuery':
                 edge_list, cursor, max_date = __parsing_CometModern__(resp)
             contents = contents + edge_list
+
+            if not has_next_page(resp):
+                raise UnboundLocalError(f"Reached the last page")
 
             # break times to zero
             break_times = 0
@@ -228,6 +229,7 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             print('REQUEST LOG >>  pageid: {}, docid: {}, cursor: {}'.format(pageid, docid, cursor))
             print('RESPONSE LOG: ', resp.text[:3000])
             break_times += 1
+            print(f"[{type(e).__name__}] ")
             time.sleep(15)
             # Get New cookie ID
             headers = __get_cookieid__(pageurl)

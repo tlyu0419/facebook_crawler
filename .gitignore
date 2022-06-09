@@ -3,3 +3,5 @@ develop/
 .vscode/
 dist/
 *egg-info/
+.idea/
+venv2/
