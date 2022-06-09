@@ -129,8 +129,8 @@ def __parsing_ProfileComet__(resp):
 
     max_date = max([edge[1] for edge in edge_list])
     max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
-    cursor = edge_list[-1][-2]
-    print('The maximum date of these posts is: {}, keep crawling...'.format(max_date))
+    cursor = edge_list[-1][-3] # DANGEROUS
+    print('The maximum date of these posts is: {}, {}, keep crawling...'.format(max_date, cursor))
     return edge_list, cursor, max_date
 
 def __parsing_CometModern__(resp):
@@ -147,7 +147,7 @@ def __parsing_CometModern__(resp):
     max_date = max([edge[1] for edge in edge_list])
     max_date = datetime.datetime.fromtimestamp(int(max_date)).strftime('%Y-%m-%d')
     print('The maximum date of these posts is: {}, keep crawling...'.format(max_date))
-    cursor = edge_list[-1][-2]
+    cursor = edge_list[-1][-3] # DANGEROUS
     return edge_list, cursor, max_date
 
 def __extract_reactions__(reactions, reaction_type):
@@ -225,11 +225,10 @@ def Crawl_PagePosts(pageurl, until_date='2018-01-01'):
             break
 
         except Exception as e:
-            print('Break Times {}: Something went wrong with this request. Sleep 15 seconds and retry to request new posts.'.format(break_times))
+            print(f'Break Times {break_times}: [{type(e).__name__}] Exceptions happened with this request. Sleep 15 seconds and retry to request new posts.')
             print('REQUEST LOG >>  pageid: {}, docid: {}, cursor: {}'.format(pageid, docid, cursor))
             print('RESPONSE LOG: ', resp.text[:3000])
             break_times += 1
-            print(f"[{type(e).__name__}] ")
             time.sleep(15)
             # Get New cookie ID
             headers = __get_cookieid__(pageurl)
