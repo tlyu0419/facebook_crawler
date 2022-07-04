@@ -35,6 +35,8 @@ def __get_pageid__(pageurl):
         pageid = re.findall(r'"identifier":(.*?),', resp.text)[0]
     elif len(re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)) >= 1:
         pageid = re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)[0]
+    elif len(re.findall('fb://group|page|profile/([0-9]{1,})', resp.text)) >= 1:
+        pageid = re.findall('fb://group|page|profile/([0-9]{1,})', resp.text)[0]
     else:
         pageid = ''
     print('{}\'s pageid is: {}'.format(pageurl.split('/', -1)[-1], pageid))
