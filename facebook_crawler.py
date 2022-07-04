@@ -42,6 +42,8 @@ def __get_pageid__(pageurl):
         pageid = re.findall(r'"identifier":(.*?),', resp.text)[0]
     elif len(re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)) >= 1:
         pageid = re.findall('delegate_page":\{"id":"(.*?)"\},', resp.text)[0]
+    elif len(re.findall('fb://group|page|profile/([0-9]{1,})', resp.text)) >= 1:
+        pageid = re.findall('fb://group|page|profile/([0-9]{1,})', resp.text)[0]
     else:
         pageid = ''
     print('{}\'s pageid is: {}'.format(pageurl.split('/', -1)[-1], pageid))
@@ -353,4 +355,5 @@ def Crawl_GroupPosts(groupurl, until_date='2019-01-01'):
 
     df = pd.merge(left=content_df, right=feedback_df, how='left', on='POSTID')
     df['UPDATETIME'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     return df
