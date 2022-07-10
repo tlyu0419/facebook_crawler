@@ -68,7 +68,21 @@ The project can help us collect the data from Facebook's public Fanspage / group
 - [MIT License](https://github.com/TLYu0419/facebook_crawler/blob/main/LICENSE)
 - 本專案提供的所有內容均用於教育、非商業用途。本專案不對資料內容錯誤、更新延誤或傳輸中斷負任何責任。
 
+## Donor
+
+Thanks to these donors for their help, this project can continue to maintain and develop new functions.
+
+感謝以下捐款人的幫助，由於有他們的幫忙這個專案才能夠持續維運並開發新的功能
+
+- Simon Hsu （徐聖訓）
+- 梁家仁 （えびさん）
+- 趙志龍
+- 李例嬛
+- 柯宜彣
+- Wilson
+
 ## Contact Info
+
 - Author: TENG-LIN YU
 - Email: tlyu0419@gmail.com
 - Facebook: https://www.facebook.com/tlyu0419
@@ -78,6 +92,6 @@ The project can help us collect the data from Facebook's public Fanspage / group
 
 
 ## Log
-
+- 0.028: Modularized the crawler function.
 - 0.0.26
   1. Auto changes the cookie after it's expired to keep crawling data without changing IP.

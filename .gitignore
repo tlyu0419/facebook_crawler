@@ -1,0 +1,10 @@
+develop/
+.ipynb_checkpoints/
+.vscode/
+dist/
+*egg-info/
+.idea/
+venv2/
+build/
+dist/
+__pycache__/
