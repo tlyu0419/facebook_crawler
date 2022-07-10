@@ -1,7 +1,0 @@
-develop/
-.ipynb_checkpoints/
-.vscode/
-dist/
-*egg-info/
-.idea/
-venv2/
