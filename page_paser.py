@@ -176,19 +176,19 @@ def _parse_pageurl(homepage_response):
     return pageurl
 
 
-
-if __name__ == '__main':
-    pageurl = 'https://www.facebook.com/Gooaye'
-    pageurl = 'https://www.facebook.com/groups/pythontw'
-    headers = _get_headers(pageurl)
-    homepage_response = _get_homepage(pageurl=pageurl, headers=headers)
-    pagename = _parse_pagename(homepage_response).encode('utf-8').decode()
-    entryPoint = _parse_entryPoint(homepage_response)
-    entryPoint = _parse_entryPoint(homepage_response)
-    identifier = _parse_identifier(entryPoint, homepage_response)
-    doc_id = _parse_docid(entryPoint, homepage_response)
-    likes = _parse_likes(homepage_response, entryPoint, headers)
-    creation_time =_parse_creation_time(homepage_response=homepage_response, entryPoint=entryPoint, headers=headers)
-    category = _parse_category(homepage_response, entryPoint, headers)
-    pageurl = _parse_pageurl(homepage_response)
-    
+#
+# if __name__ == '__main':
+#     pageurl = 'https://www.facebook.com/Gooaye'
+#     pageurl = 'https://www.facebook.com/groups/pythontw'
+#     headers = _get_headers(pageurl)
+#     homepage_response = _get_homepage(pageurl=pageurl, headers=headers)
+#     pagename = _parse_pagename(homepage_response).encode('utf-8').decode()
+#     entryPoint = _parse_entryPoint(homepage_response)
+#     entryPoint = _parse_entryPoint(homepage_response)
+#     identifier = _parse_identifier(entryPoint, homepage_response)
+#     doc_id = _parse_docid(entryPoint, homepage_response)
+#     likes = _parse_likes(homepage_response, entryPoint, headers)
+#     creation_time =_parse_creation_time(homepage_response=homepage_response, entryPoint=entryPoint, headers=headers)
+#     category = _parse_category(homepage_response, entryPoint, headers)
+#     pageurl = _parse_pageurl(homepage_response)
+#

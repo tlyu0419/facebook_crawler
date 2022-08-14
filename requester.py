@@ -83,21 +83,21 @@ def _get_posts(headers, identifier, entryPoint, docid, cursor):
                              headers=headers)
     return resp
 
-
-if __name__ == '__main__':
-    pageurl = 'https://www.facebook.com/ec.ltn.tw/'
-    pageurl = 'https://www.facebook.com/Gooaye'
-    pageurl = 'https://www.facebook.com/groups/pythontw'
-    headers = _get_headers(pageurl)
-    homepage_response = _get_homepage(pageurl=pageurl, headers=headers)
-    # entryPoint = _parse_entryPoint(homepage_response)
-    # identifier = _parse_identifier(entryPoint, homepage_response)
-    # docid = _parse_docid(entryPoint, homepage_response)
-    # df, cursor, max_date, break_times = _init_request_vars()
-
-    # resp = _get_posts(headers=headers, 
-    #                 identifier=identifier, 
-    #                 entryPoint=entryPoint,
-    #                 docid=docid,
-    #                 cursor=cursor)
-    # print(len(resp.text))
+#
+# if __name__ == '__main__':
+#     pageurl = 'https://www.facebook.com/ec.ltn.tw/'
+#     pageurl = 'https://www.facebook.com/Gooaye'
+#     pageurl = 'https://www.facebook.com/groups/pythontw'
+#     headers = _get_headers(pageurl)
+#     homepage_response = _get_homepage(pageurl=pageurl, headers=headers)
+#     # entryPoint = _parse_entryPoint(homepage_response)
+#     # identifier = _parse_identifier(entryPoint, homepage_response)
+#     # docid = _parse_docid(entryPoint, homepage_response)
+#     # df, cursor, max_date, break_times = _init_request_vars()
+#
+#     # resp = _get_posts(headers=headers,
+#     #                 identifier=identifier,
+#     #                 entryPoint=entryPoint,
+#     #                 docid=docid,
+#     #                 cursor=cursor)
+#     # print(len(resp.text))
