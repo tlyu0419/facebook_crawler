@@ -4,17 +4,21 @@ import time
 # from  page_paser import _parse_entryPoint, _parse_identifier, _parse_docid
 from utils import _init_request_vars
 
+
 def _get_headers(pageurl):
     '''
     Send a request to get cookieid as headers.
     '''
     pageurl = re.sub('www', 'm', pageurl)
     resp = requests.get(pageurl)
-    headers={'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-             'accept-language': 'en'}
-    headers['cookie'] = '; '.join(['{}={}'.format(cookieid, resp.cookies.get_dict()[cookieid]) for cookieid in resp.cookies.get_dict()])
+    headers = {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'accept-language': 'en'}
+    headers['cookie'] = '; '.join(
+        ['{}={}'.format(cookieid, resp.cookies.get_dict()[cookieid]) for cookieid in resp.cookies.get_dict()])
     # headers['cookie'] = headers['cookie'] + '; locale=en_US'
     return headers
+
 
 def _get_homepage(pageurl, headers):
     '''
@@ -32,7 +36,9 @@ def _get_homepage(pageurl, headers):
             if timeout_cnt > 20:
                 class homepage_response():
                     text = 'Sorry, something went wrong.'
+
                 return homepage_response
+
 
 def _get_pageabout(homepage_response, entryPoint, headers):
     '''
@@ -40,7 +46,8 @@ def _get_pageabout(homepage_response, entryPoint, headers):
     '''
     pageurl = re.sub('/$', '', homepage_response.url)
     pageabout = requests.get(pageurl + '/about', headers=headers)
-    return pageabout 
+    return pageabout
+
 
 def _get_pagetransparency(homepage_response, entryPoint, headers):
     '''
@@ -49,7 +56,7 @@ def _get_pagetransparency(homepage_response, entryPoint, headers):
     pageurl = re.sub('/$', '', homepage_response.url)
     if entryPoint in ['ProfilePlusCometLoggedOutRouteRoot.entrypoint']:
         transparency_response = requests.get(pageurl + '/about_profile_transparency', headers=headers)
-        return transparency_response   
+        return transparency_response
 
 
 def _get_posts(headers, identifier, entryPoint, docid, cursor):
@@ -58,23 +65,24 @@ def _get_posts(headers, identifier, entryPoint, docid, cursor):
     '''
     if entryPoint in ['nojs']:
         params = {'page_id': identifier,
-                  'cursor': str({"timeline_cursor":cursor,
-                                 "timeline_section_cursor":'{}',
-                                 "has_next_page":'true'}),
+                  'cursor': str({"timeline_cursor": cursor,
+                                 "timeline_section_cursor": '{}',
+                                 "has_next_page": 'true'}),
                   'surface': 'www_pages_posts',
                   'unit_count': 10,
                   '__a': '1'}
         resp = requests.get(url='https://www.facebook.com/pages_reaction_units/more/',
                             params=params)
-        
-    else: # entryPoint in ['CometSinglePageHomeRoot.entrypoint', 'ProfilePlusCometLoggedOutRouteRoot.entrypoint', 'CometGroupDiscussionRoot.entrypoint']
+
+    else:  # entryPoint in ['CometSinglePageHomeRoot.entrypoint', 'ProfilePlusCometLoggedOutRouteRoot.entrypoint', 'CometGroupDiscussionRoot.entrypoint']
         data = {'variables': str({'cursor': cursor,
-                                  'id':identifier}),
-                'doc_id':docid} 
+                                  'id': identifier}),
+                'doc_id': docid}
         resp = requests.post(url='https://www.facebook.com/api/graphql/',
                              data=data,
                              headers=headers)
     return resp
+
 
 if __name__ == '__main__':
     pageurl = 'https://www.facebook.com/ec.ltn.tw/'
