@@ -1,11 +1,13 @@
-import os
 import datetime
+import os
 import time
-import pandas as pd
 import warnings
+
+import pandas as pd
+
 warnings.filterwarnings("ignore")
 
-from utils import _connect_db, _extract_id, _extract_reactions, _init_request_vars, _get_headers
+from utils import _init_request_vars, _get_headers
 from requester import _get_homepage, _get_posts
 from page_paser import _parse_entryPoint, _parse_identifier, _parse_docid
 from post_paser import _parse_composite_nojs, _parse_composite_graphql
