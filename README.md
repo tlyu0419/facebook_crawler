@@ -68,12 +68,7 @@ Thanks to these donors' help, due to their kind help, this project could keep ma
 
 由於這些捐助者的幫助，由於他們的慷慨的幫助，這個項目才得以持續維護和發展
 
-- Simon Hsu （徐聖訓）
-- 梁家仁 （えびさん）
-- 趙志龍
-- 李例嬛
-- 柯宜彣
-- Wilson
+- Simon Hsu （徐聖訓）, 梁家仁 （えびさん）, 趙志龍, 李例嬛, 柯宜彣, Wilson
 
 ## Contact Info
 - Author: TENG-LIN YU
