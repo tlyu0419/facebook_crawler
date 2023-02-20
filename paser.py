@@ -53,8 +53,8 @@ def _parse_edge(edge):
     pageid = comet_sections['context_layout']['story']['comet_sections']['actor_photo']['story']['actors'][0]['id']
 
     # comment_count
-    comment_count = comet_sections['feedback']['story']['feedback_context'][
-        'feedback_target_with_context']['ufi_renderer']['feedback']['comment_count']['total_count']
+    comment_count = comet_sections['feedback']['story']['feedback_context']['feedback_target_with_context'][
+        'ufi_renderer']['feedback']['comment_list_renderer']['feedback']['comment_count']['total_count']
 
     # reaction_count
     reaction_count = comet_sections['feedback']['story']['feedback_context']['feedback_target_with_context'][
@@ -65,8 +65,8 @@ def _parse_edge(edge):
         'ufi_renderer']['feedback']['comet_ufi_summary_and_actions_renderer']['feedback']['share_count']['count']
 
     # toplevel_comment_count
-    toplevel_comment_count = comet_sections['feedback']['story']['feedback_context'][
-        'feedback_target_with_context']['ufi_renderer']['feedback']['toplevel_comment_count']['count']
+    toplevel_comment_count = comet_sections['feedback']['story']['feedback_context']['feedback_target_with_context'][
+        'ufi_renderer']['feedback']['comment_list_renderer']['feedback']['toplevel_comment_count']['count']
 
     # top_reactions
     top_reactions = comet_sections['feedback']['story']['feedback_context']['feedback_target_with_context']['ufi_renderer'][
