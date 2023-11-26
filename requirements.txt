@@ -3,3 +3,4 @@ bs4==0.0.1
 pandas==1.2.4         
 numpy==1.20.3
 dicttoxml==1.7.4
+lxml==4.9.2

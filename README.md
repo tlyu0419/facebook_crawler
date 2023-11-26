@@ -67,8 +67,10 @@ Thanks to these donors' help, due to their kind help, this project could keep ma
 **贊助不是使用這個套件的必要條件**，但如能獲得你的支持我將會非常感謝。不論是贊助、給予星星或分享都是很好的支持方式，幫助我繼續維護和開發這個專案
 
 由於這些捐助者的幫助，由於他們的慷慨的幫助，這個項目才得以持續維護和發展
-
-- Simon Hsu （徐聖訓）, 梁家仁 （えびさん）, 趙志龍, 李例嬛, 柯宜彣, Wilson
+- Universities
+  - [Department of Social Work. The Chinese University of Hong Kong(香港中文大學社會工作學系)](https://web.swk.cuhk.edu.hk/zh-tw/)
+  - [Education, Graduate School of Curriculum and Instructional Communications Technology. National Taipei University.(國立台北教育大學課程與教學傳播科技研究所)](https://cict.ntue.edu.tw/?locale=zh_tw)
+  - [Department of Dusiness Administration. Chung Hua University.(中華大學企業管理學系)](https://ba.chu.edu.tw/?Lang=en)
 
 ## Contact Info
 - Author: TENG-LIN YU
