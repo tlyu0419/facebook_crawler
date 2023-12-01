@@ -19,8 +19,12 @@ def _parse_edgelist(resp):
     except:
         for data in resp.text.split('\r\n', -1):
             try:
-                edges.append(json.loads(data)[
-                             'data']['node']['timeline_list_feed_units']['edges'][0])
+                if 'timeline_list_feed_units' in json.loads(data)['data']['node']:
+                    edges.append(json.loads(data)['data']['node']['timeline_list_feed_units']['edges'][0])
+                elif 'timeline_feed_units' in json.loads(data)['data']['node']:
+                    edges.append(json.loads(data)['data']['node']['timeline_feed_units']['edges'][0])
+                else:
+                    edges.append(json.loads(data)['data']['node']['timeline_list_feed_units']['edges'][0])
             except:
                 edges.append(json.loads(data)['data'])
     return edges
